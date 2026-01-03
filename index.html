@@ -6,6 +6,7 @@
     <title>MoodTunes</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
+
   <body>
     <header class="container">
       <h1>MoodTunes</h1>
@@ -15,14 +16,48 @@
     <main class="container">
       <section class="card">
         <h2>Start</h2>
-        <button id="btn" class="btn">Test button</button>
-        <p id="output" class="muted"></p>
-        <ul id="tracks"></ul>
-        <button id="create" class="btn">Create playlist (mock)</button>
-        <p id="created" class="muted"></p>
+
+        <!-- MVP controls (no styling focus) -->
+        <div style="margin: 12px 0; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <label>
+            Mood:
+            <select id="mood">
+              <option value="happy">Happy</option>
+              <option value="chill">Chill</option>
+              <option value="sad">Sad</option>
+              <option value="focus">Focus</option>
+            </select>
+          </label>
+
+          <label>
+            Intent:
+            <select id="intent">
+              <option value="turn-it-up">Turn it up</option>
+              <option value="take-it-easy">Take it easy</option>
+              <option value="stay-focused">Stay focused</option>
+              <option value="go-with-flow">Go with the flow</option>
+            </select>
+          </label>
+
+          <label>
+            Tracks:
+            <input id="limit" type="number" min="1" max="30" value="8" style="width: 70px;" />
+          </label>
+        </div>
+
+        <button id="btn" class="btn">Generate playlist</button>
+
+        <p id="output" class="muted" style="margin-top: 12px;"></p>
+        <ul id="tracks" style="margin-top: 10px;"></ul>
+
+        <div style="margin-top: 16px;">
+          <button id="create" class="btn">Create playlist (mock)</button>
+          <p id="created" class="muted" style="margin-top: 10px;"></p>
+        </div>
       </section>
     </main>
 
+    <!-- IMPORTANT: module so imports work -->
     <script type="module" src="./app.js"></script>
   </body>
 </html>
