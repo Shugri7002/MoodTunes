@@ -1,6 +1,10 @@
 import { generatePlaylist } from "./logic/generator.js";
 import { createMoodTunesPlaylist } from "./logic/createPlaylist.js";
 
+const moodSelect = document.getElementById("mood");
+const intentSelect = document.getElementById("intent");
+const limitInput = document.getElementById("limit");
+
 const btn = document.getElementById("btn");
 const output = document.getElementById("output");
 const tracksEl = document.getElementById("tracks");
@@ -10,25 +14,32 @@ const createdEl = document.getElementById("created");
 
 let lastPlaylist = null;
 
-btn.addEventListener("click", () => {
-  const playlist = generatePlaylist({
-    mood: "happy",
-    intent: "turn-it-up",
-    limit: 8,
-  });
-
-  lastPlaylist = playlist;
-
-  output.textContent = `${playlist.name} — ${playlist.tracks.length} tracks`;
-
+function renderTracks(tracks) {
   tracksEl.innerHTML = "";
-  playlist.tracks.forEach((t, i) => {
+  tracks.forEach((t, i) => {
     const li = document.createElement("li");
     li.textContent = `${i + 1}. ${t.title} — ${t.artist}`;
     tracksEl.appendChild(li);
   });
+}
 
-  createdEl.textContent = ""; // reset
+btn.addEventListener("click", () => {
+  const mood = moodSelect.value;
+  const intent = intentSelect.value;
+
+  const limit = Math.max(
+    1,
+    Math.min(30, Number.parseInt(limitInput.value || "8", 10))
+  );
+
+  const playlist = generatePlaylist({ mood, intent, limit });
+
+  lastPlaylist = playlist;
+
+  output.textContent = `${playlist.name} — ${playlist.tracks.length} tracks`;
+  renderTracks(playlist.tracks);
+
+  createdEl.textContent = "";
 });
 
 createBtn.addEventListener("click", async () => {
