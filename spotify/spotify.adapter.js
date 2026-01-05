@@ -1,6 +1,28 @@
 // spotify/spotify.adapter.js
-// Later: switch this to real Spotify API implementation
+// Use mock for now, switch to real API when authenticated
 
 import * as mock from "./spotify.mock.js";
+import * as api from "./spotify.api.js";
+import { isAuthenticated } from "./spotify.auth.js";
 
-export const spotify = mock;
+// Use real API if authenticated, otherwise use mock
+export const spotify = {
+  getMe: async () => {
+    if (isAuthenticated()) {
+      return api.getMe();
+    }
+    return mock.getMe();
+  },
+  createPlaylist: async (params) => {
+    if (isAuthenticated()) {
+      return api.createPlaylist(params);
+    }
+    return mock.createPlaylist(params);
+  },
+  addTracksToPlaylist: async (params) => {
+    if (isAuthenticated()) {
+      return api.addTracksToPlaylist(params);
+    }
+    return mock.addTracksToPlaylist(params);
+  },
+};

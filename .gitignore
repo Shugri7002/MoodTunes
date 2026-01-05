@@ -1,0 +1,16 @@
+# Environment variables
+.env
+.env.local
+
+# Spotify credentials (optioneel, als je een aparte config file maakt)
+spotify/spotify.config.local.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo

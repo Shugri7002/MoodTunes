@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="nl">
   <head>
     <meta charset="UTF-8" />
@@ -11,6 +11,19 @@
     <header class="container">
       <h1>MoodTunes</h1>
       <p class="muted">Pick a mood. Get a playlist vibe.</p>
+      <div id="auth-section" style="margin-top: 12px">
+        <button id="login-btn" class="btn">Login with Spotify</button>
+        <div id="user-info" style="display: none">
+          <span id="user-name" class="muted"></span>
+          <button
+            id="logout-btn"
+            class="btn"
+            style="margin-left: 8px; padding: 4px 12px; font-size: 0.9em"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
     </header>
 
     <main class="container">
@@ -18,7 +31,15 @@
         <h2>Start</h2>
 
         <!-- MVP controls (no styling focus) -->
-        <div style="margin: 12px 0; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+        <div
+          style="
+            margin: 12px 0;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+          "
+        >
           <label>
             Mood:
             <select id="mood">
@@ -41,18 +62,25 @@
 
           <label>
             Tracks:
-            <input id="limit" type="number" min="1" max="30" value="8" style="width: 70px;" />
+            <input
+              id="limit"
+              type="number"
+              min="1"
+              max="30"
+              value="8"
+              style="width: 70px"
+            />
           </label>
         </div>
 
         <button id="btn" class="btn">Generate playlist</button>
 
-        <p id="output" class="muted" style="margin-top: 12px;"></p>
-        <ul id="tracks" style="margin-top: 10px;"></ul>
+        <p id="output" class="muted" style="margin-top: 12px"></p>
+        <ul id="tracks" style="margin-top: 10px"></ul>
 
-        <div style="margin-top: 16px;">
-          <button id="create" class="btn">Create playlist (mock)</button>
-          <p id="created" class="muted" style="margin-top: 10px;"></p>
+        <div style="margin-top: 16px">
+          <button id="create" class="btn">Create playlist on Spotify</button>
+          <p id="created" class="muted" style="margin-top: 10px"></p>
         </div>
       </section>
     </main>
