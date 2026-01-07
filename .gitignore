@@ -4,6 +4,7 @@
 
 # Spotify credentials (optioneel, als je een aparte config file maakt)
 spotify/spotify.config.local.js
+spotify/spotify.config.js
 
 # OS files
 .DS_Store
