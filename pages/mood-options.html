@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MoodTunes - Customize Playlist</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+
+  <body>
+    <header class="container">
+      <h1>MoodTunes</h1>
+      <div id="user-info" class="muted"></div>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <h2>Customize Your Playlist</h2>
+        <p class="muted">Choose your mood, intent, and number of tracks</p>
+
+        <div class="options-grid">
+          <label>
+            <span>Mood:</span>
+            <select id="mood" class="input-field">
+              <option value="happy">Happy</option>
+              <option value="chill">Chill</option>
+              <option value="sad">Sad</option>
+              <option value="focus">Focus</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Intent:</span>
+            <select id="intent" class="input-field">
+              <option value="turn-it-up">Turn it up</option>
+              <option value="take-it-easy">Take it easy</option>
+              <option value="stay-focused">Stay focused</option>
+              <option value="go-with-flow">Go with the flow</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Number of Tracks:</span>
+            <input
+              id="limit"
+              type="number"
+              min="1"
+              max="30"
+              value="8"
+              class="input-field"
+            />
+          </label>
+        </div>
+
+        <button id="generate-btn" class="btn btn-large">🎵 Generate Playlist</button>
+      </section>
+    </main>
+
+    <script type="module" src="../js/customize.js"></script>
+  </body>
+</html>
