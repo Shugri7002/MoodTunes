@@ -1,7 +1,7 @@
 // spotify/spotify.auth.js
 // Spotify OAuth authentication with PKCE flow
 
-import { SPOTIFY_CONFIG } from "./spotify.config.local.js";
+import { SPOTIFY_CONFIG } from "./spotify.config.js";
 
 // Generate a random string for PKCE
 function generateRandomString(length) {

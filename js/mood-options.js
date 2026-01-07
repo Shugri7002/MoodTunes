@@ -41,7 +41,10 @@ generateBtn.addEventListener("click", () => {
   );
 
   // Store playlist options in localStorage
-  localStorage.setItem("playlistOptions", JSON.stringify({ mood, intent, limit }));
+  localStorage.setItem(
+    "playlistOptions",
+    JSON.stringify({ mood, intent, limit })
+  );
 
   // Navigate to playlist page
   window.location.href = "playlist.html";

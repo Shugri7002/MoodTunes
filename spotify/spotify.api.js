@@ -1,7 +1,7 @@
 // spotify/spotify.api.js
 // Real Spotify Web API client
 
-import { SPOTIFY_CONFIG } from "./spotify.config.local.js";
+import { SPOTIFY_CONFIG } from "./spotify.config.js";
 import { getAccessToken, refreshAccessToken } from "./spotify.auth.js";
 
 // Make authenticated API request
