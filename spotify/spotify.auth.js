@@ -1,12 +1,19 @@
 // spotify/spotify.auth.js
-// Spotify OAuth authentication with PKCE flow
+// Spotify OAuth authentication with PKCE flow (SPA-friendly)
 
 import { SPOTIFY_CONFIG } from "./spotify.config.js";
 
+const STORAGE = {
+  accessToken: "spotify_access_token",
+  expiresAt: "spotify_token_expires_at",
+  refreshToken: "spotify_refresh_token",
+  codeVerifier: "spotify_code_verifier",
+  tokenScope: "spotify_token_scope",
+};
+
 // Generate a random string for PKCE
 function generateRandomString(length) {
-  const possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let text = "";
   for (let i = 0; i < length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -24,64 +31,56 @@ async function generateCodeChallenge(verifier) {
     .replace(/=+$/, "");
 }
 
-// Store PKCE verifier in sessionStorage
 function storeVerifier(verifier) {
-  sessionStorage.setItem("spotify_code_verifier", verifier);
+  sessionStorage.setItem(STORAGE.codeVerifier, verifier);
 }
 
-// Get stored verifier
 function getVerifier() {
-  return sessionStorage.getItem("spotify_code_verifier");
+  return sessionStorage.getItem(STORAGE.codeVerifier);
 }
 
-// Clear stored verifier
 function clearVerifier() {
-  sessionStorage.removeItem("spotify_code_verifier");
+  sessionStorage.removeItem(STORAGE.codeVerifier);
 }
 
-// Store access token
-export function storeAccessToken(token, expiresIn) {
-  const expiresAt = Date.now() + expiresIn * 1000;
-  localStorage.setItem("spotify_access_token", token);
-  localStorage.setItem("spotify_token_expires_at", expiresAt.toString());
+export function storeAccessToken(token, expiresIn, scope = "") {
+  const expiresAt = Date.now() + Number(expiresIn || 0) * 1000;
+  localStorage.setItem(STORAGE.accessToken, token);
+  localStorage.setItem(STORAGE.expiresAt, String(expiresAt));
+  if (scope) localStorage.setItem(STORAGE.tokenScope, scope);
 }
 
-// Get stored access token
 export function getAccessToken() {
-  const token = localStorage.getItem("spotify_access_token");
-  const expiresAt = localStorage.getItem("spotify_token_expires_at");
+  const token = localStorage.getItem(STORAGE.accessToken);
+  const expiresAt = localStorage.getItem(STORAGE.expiresAt);
 
-  if (!token || !expiresAt) {
-    return null;
-  }
+  if (!token || !expiresAt) return null;
 
-  // Check if token is expired
-  if (Date.now() >= parseInt(expiresAt, 10)) {
-    clearAccessToken();
+  // expired?
+  if (Date.now() >= Number(expiresAt)) {
+    // don't nuke refresh token here; refreshAccessToken might still work
+    localStorage.removeItem(STORAGE.accessToken);
+    localStorage.removeItem(STORAGE.expiresAt);
     return null;
   }
 
   return token;
 }
 
-// Clear access token
 export function clearAccessToken() {
-  localStorage.removeItem("spotify_access_token");
-  localStorage.removeItem("spotify_token_expires_at");
-  localStorage.removeItem("spotify_refresh_token");
+  localStorage.removeItem(STORAGE.accessToken);
+  localStorage.removeItem(STORAGE.expiresAt);
+  localStorage.removeItem(STORAGE.tokenScope);
 }
 
-// Store refresh token
 export function storeRefreshToken(token) {
-  localStorage.setItem("spotify_refresh_token", token);
+  if (token) localStorage.setItem(STORAGE.refreshToken, token);
 }
 
-// Get refresh token
 export function getRefreshToken() {
-  return localStorage.getItem("spotify_refresh_token");
+  return localStorage.getItem(STORAGE.refreshToken);
 }
 
-// Check if user is authenticated
 export function isAuthenticated() {
   return getAccessToken() !== null;
 }
@@ -93,18 +92,16 @@ export async function initiateLogin() {
 
   storeVerifier(verifier);
 
-  const redirectUri = SPOTIFY_CONFIG.REDIRECT_URI;
-
   const params = new URLSearchParams({
     response_type: "code",
     client_id: SPOTIFY_CONFIG.CLIENT_ID,
     scope: SPOTIFY_CONFIG.SCOPES,
-    redirect_uri: redirectUri,
+    redirect_uri: SPOTIFY_CONFIG.REDIRECT_URI,
     code_challenge_method: "S256",
     code_challenge: challenge,
   });
 
-  window.location.href = `${SPOTIFY_CONFIG.AUTH_URL}?${params.toString()}`;
+  window.location.assign(`${SPOTIFY_CONFIG.AUTH_URL}?${params.toString()}`);
 }
 
 // Handle OAuth callback and exchange code for token
@@ -113,15 +110,12 @@ export async function handleCallback() {
   const code = urlParams.get("code");
   const error = urlParams.get("error");
 
-  // Clean up URL
-  window.history.replaceState({}, document.title, window.location.pathname);
-
   if (error) {
     throw new Error(`Spotify authorization error: ${error}`);
   }
 
   if (!code) {
-    return false; // No code in URL, user hasn't authorized yet
+    return false; // not a callback
   }
 
   const verifier = getVerifier();
@@ -132,36 +126,29 @@ export async function handleCallback() {
   try {
     const response = await fetch(SPOTIFY_CONFIG.TOKEN_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         grant_type: "authorization_code",
-        code: code,
+        code,
         redirect_uri: SPOTIFY_CONFIG.REDIRECT_URI,
         client_id: SPOTIFY_CONFIG.CLIENT_ID,
         code_verifier: verifier,
       }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `Token exchange failed: ${
-          errorData.error_description || errorData.error
-        }`
-      );
-    }
-
     const data = await response.json();
 
-    storeAccessToken(data.access_token, data.expires_in);
-    if (data.refresh_token) {
-      storeRefreshToken(data.refresh_token);
+    if (!response.ok) {
+      throw new Error(`Token exchange failed: ${data.error_description || data.error || "unknown_error"}`);
     }
+
+    storeAccessToken(data.access_token, data.expires_in, data.scope || "");
+    if (data.refresh_token) storeRefreshToken(data.refresh_token);
 
     clearVerifier();
 
+    // ✅ Clean up URL after success
+    window.history.replaceState({}, document.title, window.location.pathname);
     return true;
   } catch (err) {
     clearVerifier();
@@ -172,7 +159,6 @@ export async function handleCallback() {
 // Refresh access token using refresh token
 export async function refreshAccessToken() {
   const refreshToken = getRefreshToken();
-
   if (!refreshToken) {
     throw new Error("No refresh token available. Please log in again.");
   }
@@ -180,9 +166,7 @@ export async function refreshAccessToken() {
   try {
     const response = await fetch(SPOTIFY_CONFIG.TOKEN_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         grant_type: "refresh_token",
         refresh_token: refreshToken,
@@ -190,25 +174,21 @@ export async function refreshAccessToken() {
       }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `Token refresh failed: ${
-          errorData.error_description || errorData.error
-        }`
-      );
-    }
-
     const data = await response.json();
 
-    storeAccessToken(data.access_token, data.expires_in);
-    if (data.refresh_token) {
-      storeRefreshToken(data.refresh_token);
+    if (!response.ok) {
+      throw new Error(`Token refresh failed: ${data.error_description || data.error || "unknown_error"}`);
     }
+
+    storeAccessToken(data.access_token, data.expires_in, data.scope || "");
+    // Spotify often does NOT return refresh_token on refresh; only store if present
+    if (data.refresh_token) storeRefreshToken(data.refresh_token);
 
     return data.access_token;
   } catch (err) {
+    // if refresh fails, clear access token but keep refresh token? safer to clear all and force login
     clearAccessToken();
+    localStorage.removeItem(STORAGE.refreshToken);
     throw err;
   }
 }
@@ -216,5 +196,12 @@ export async function refreshAccessToken() {
 // Logout
 export function logout() {
   clearAccessToken();
+  localStorage.removeItem(STORAGE.refreshToken);
   clearVerifier();
+
+  // also clear moodtunes flow keys (nice for demos)
+  localStorage.removeItem("playlistOptions");
+  sessionStorage.removeItem("mood");
+  sessionStorage.removeItem("intent");
+  sessionStorage.removeItem("trackCount");
 }

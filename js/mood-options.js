@@ -1,51 +1,73 @@
-// js/customize.js
-// Handles the customize page - mood/intent selection
-
+// js/mood-options.js
 import { isAuthenticated } from "../spotify/spotify.auth.js";
 import { spotify } from "../spotify/spotify.adapter.js";
 
 const moodSelect = document.getElementById("mood");
 const intentSelect = document.getElementById("intent");
-const limitInput = document.getElementById("limit");
 const generateBtn = document.getElementById("generate-btn");
 const userInfo = document.getElementById("user-info");
+const errorEl = document.getElementById("error"); // optional in HTML
 
-// Check if user came from face detection
-const detectedMood = localStorage.getItem("selectedMood");
-if (detectedMood) {
-  moodSelect.value = detectedMood;
-  localStorage.removeItem("selectedMood");
+const OPTIONS_KEY = "playlistOptions";
+const DEFAULT_LIMIT = 15; // ✅ always 15
+
+function setError(msg) {
+  if (errorEl) errorEl.textContent = msg || "";
 }
 
-// Show user info
-async function showUserInfo() {
-  if (isAuthenticated()) {
-    try {
-      const user = await spotify.getMe();
-      userInfo.textContent = `Logged in as: ${user.display_name || user.id}`;
-    } catch (err) {
-      console.error(err);
-    }
+function goToPlaylist() {
+  window.location.assign("./playlist.html");
+}
+
+// Prefill mood from scan/face page if present
+const detectedMood =
+  localStorage.getItem("selectedMood") ||
+  localStorage.getItem("moodtunes_detected_mood") ||
+  sessionStorage.getItem("mood");
+
+if (detectedMood && moodSelect) {
+  const exists = [...moodSelect.options].some((o) => o.value === detectedMood);
+  if (exists) moodSelect.value = detectedMood;
+}
+
+// cleanup old keys
+localStorage.removeItem("selectedMood");
+localStorage.removeItem("moodtunes_detected_mood");
+
+// Show user info if authenticated
+(async function showUserInfo() {
+  if (!userInfo) return;
+
+  if (!isAuthenticated()) {
+    userInfo.textContent = "Not logged in";
+    return;
   }
-}
 
-showUserInfo();
+  try {
+    const user = await spotify.getMe();
+    userInfo.textContent = `Logged in as: ${user.display_name || user.id}`;
+  } catch (err) {
+    console.error(err);
+    userInfo.textContent = "";
+  }
+})();
 
-// Generate playlist and navigate to playlist page
-generateBtn.addEventListener("click", () => {
-  const mood = moodSelect.value;
-  const intent = intentSelect.value;
-  const limit = Math.max(
-    1,
-    Math.min(30, Number.parseInt(limitInput.value || "8", 10))
-  );
+// Generate
+generateBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  try {
+    setError("");
 
-  // Store playlist options in localStorage
-  localStorage.setItem(
-    "playlistOptions",
-    JSON.stringify({ mood, intent, limit })
-  );
+    const mood = moodSelect?.value || "neutral";
+    const intent = intentSelect?.value || "go-with-flow";
 
-  // Navigate to playlist page
-  window.location.href = "playlist.html";
+    // ✅ always 15
+    const limit = DEFAULT_LIMIT;
+
+    localStorage.setItem(OPTIONS_KEY, JSON.stringify({ mood, intent, limit }));
+    goToPlaylist();
+  } catch (err) {
+    console.error(err);
+    setError("Something went wrong. Check console.");
+  }
 });

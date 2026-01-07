@@ -11,50 +11,41 @@
     <header class="container">
       <h1>MoodTunes</h1>
       <div id="user-info" class="muted"></div>
+      <p id="error" class="muted" style="color: #b00020;"></p>
     </header>
 
     <main class="container">
       <section class="card">
         <h2>Customize Your Playlist</h2>
-        <p class="muted">Choose your mood, intent, and number of tracks</p>
+        <p class="muted">Choose your mood and intent (playlist is always 15 tracks)</p>
 
         <div class="options-grid">
           <label>
             <span>Mood:</span>
             <select id="mood" class="input-field">
               <option value="happy">Happy</option>
-              <option value="chill">Chill</option>
+              <option value="angry">Angry</option>
               <option value="sad">Sad</option>
-              <option value="focus">Focus</option>
+              <option value="fearful">Fearful</option>
+              <option value="disgusted">Disgusted</option>
+              <option value="surprised">Surprised</option>
+              <option value="neutral">Neutral</option>
             </select>
           </label>
 
           <label>
             <span>Intent:</span>
             <select id="intent" class="input-field">
+              <option value="go-with-flow">Go with the flow</option>
               <option value="turn-it-up">Turn it up</option>
               <option value="take-it-easy">Take it easy</option>
               <option value="stay-focused">Stay focused</option>
-              <option value="go-with-flow">Go with the flow</option>
+              <option value="change-the-mood">Change the mood</option>
             </select>
-          </label>
-
-          <label>
-            <span>Number of Tracks:</span>
-            <input
-              id="limit"
-              type="number"
-              min="1"
-              max="30"
-              value="8"
-              class="input-field"
-            />
           </label>
         </div>
 
-        <button id="generate-btn" class="btn btn-large">
-          🎵 Generate Playlist
-        </button>
+        <button id="generate-btn" class="btn btn-large">🎵 Generate Playlist</button>
       </section>
     </main>
 

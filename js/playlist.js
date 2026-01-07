@@ -1,5 +1,4 @@
 // js/playlist.js
-// Handles the playlist results page - displays generated playlist
 import { generatePlaylist } from "../logic/generator.js";
 import { createMoodTunesPlaylist } from "../logic/createPlaylist.js";
 import { isAuthenticated } from "../spotify/spotify.auth.js";
@@ -12,87 +11,171 @@ const customizeBtn = document.getElementById("customize-btn");
 const createdEl = document.getElementById("created");
 const userInfo = document.getElementById("user-info");
 
+const OPTIONS_KEY = "playlistOptions";
+const FINAL_LIMIT = 15; // ✅ always 15
+
 let currentPlaylist = null;
 
-// Show user info
+function setStatus(msg) {
+  if (createdEl) createdEl.textContent = msg || "";
+}
+
 async function showUserInfo() {
-  if (isAuthenticated()) {
-    try {
-      const user = await spotify.getMe();
-      userInfo.textContent = `Logged in as: ${user.display_name || user.id}`;
-    } catch (err) {
-      console.error(err);
-    }
+  if (!userInfo) return;
+
+  if (!isAuthenticated()) {
+    userInfo.textContent = "Not logged in";
+    return;
+  }
+
+  try {
+    const user = await spotify.getMe();
+    userInfo.textContent = `Logged in as: ${user.display_name || user.id}`;
+  } catch (err) {
+    console.error(err);
+    userInfo.textContent = "Logged in";
   }
 }
 
-showUserInfo();
-
-function renderTracks(tracks) {
+function renderTracks(tracks = []) {
+  if (!tracksEl) return;
   tracksEl.innerHTML = "";
+
+  if (!Array.isArray(tracks) || tracks.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = "No tracks found.";
+    tracksEl.appendChild(li);
+    return;
+  }
+
   tracks.forEach((t, i) => {
     const li = document.createElement("li");
-    li.textContent = `${i + 1}. ${t.title} — ${t.artist}`;
+    const title = t?.name || "Unknown title";
+
+    // accept both: artists string OR array
+    let artists = "";
+    if (Array.isArray(t?.artists)) {
+      artists = t.artists.map((a) => (typeof a === "string" ? a : a?.name)).filter(Boolean).join(", ");
+    } else if (typeof t?.artists === "string") {
+      artists = t.artists;
+    } else if (typeof t?.artist === "string") {
+      artists = t.artist;
+    }
+
+    li.textContent = `${i + 1}. ${title}${artists ? " — " + artists : ""}`;
     tracksEl.appendChild(li);
   });
 }
 
-// Load playlist options from localStorage and generate playlist
-function loadAndGeneratePlaylist() {
-  const optionsStr = localStorage.getItem("playlistOptions");
-  if (!optionsStr) {
-    // No options found, redirect to customize
-    window.location.href = "mood-options.html";
+function getOptions() {
+  const raw = localStorage.getItem(OPTIONS_KEY);
+  if (!raw) return null;
+
+  try {
+    const obj = JSON.parse(raw);
+    return {
+      mood: obj?.mood || "neutral",
+      intent: obj?.intent || "go-with-flow",
+      // ✅ force 15 always
+      limit: FINAL_LIMIT,
+    };
+  } catch (e) {
+    console.error("Failed to parse playlistOptions:", e);
+    return null;
+  }
+}
+
+async function loadAndGeneratePlaylist() {
+  try {
+    const opts = getOptions();
+    if (!opts) {
+      window.location.assign("./mood-options.html");
+      return;
+    }
+
+    setStatus(isAuthenticated() ? "Generating playlist..." : "Not logged in — generating preview...");
+
+    const playlist = await generatePlaylist(opts);
+    currentPlaylist = playlist || null;
+
+    const tracks = currentPlaylist?.tracks || [];
+
+    if (!tracks.length) {
+      playlistNameEl.textContent = "No playlist generated";
+      renderTracks([]);
+      if (createBtn) createBtn.disabled = true;
+      setStatus(isAuthenticated() ? "No tracks returned. Try another mood/intent." : "Login required for Spotify tracks.");
+      return;
+    }
+
+    // UI title
+    playlistNameEl.textContent = `${currentPlaylist.name || "Playlist"} — ${tracks.length} tracks`;
+    renderTracks(tracks);
+
+    // Create button logic
+    const hasUris = tracks.some((t) => Boolean(t?.uri));
+    const canCreate = isAuthenticated() && hasUris;
+
+    if (createBtn) createBtn.disabled = !canCreate;
+    setStatus(canCreate ? "Ready to add to Spotify ✅" : "Login required to add to Spotify.");
+  } catch (err) {
+    console.error("Error generating playlist:", err);
+    playlistNameEl.textContent = "Error generating playlist";
+    renderTracks([]);
+    if (createBtn) createBtn.disabled = true;
+    setStatus(`❌ ${err?.message || String(err)}`);
+  }
+}
+
+async function handleCreate() {
+  if (!currentPlaylist?.tracks?.length) return;
+
+  if (!isAuthenticated()) {
+    setStatus("Please login to add to Spotify.");
     return;
   }
 
-  const options = JSON.parse(optionsStr);
-  const { mood, intent, limit } = options;
-
-  // Generate playlist
-  const playlist = generatePlaylist({ mood, intent, limit });
-  currentPlaylist = playlist;
-
-  // Display playlist
-  playlistNameEl.textContent = `${playlist.name} — ${playlist.tracks.length} tracks`;
-  renderTracks(playlist.tracks);
-
-  // Clear options from localStorage
-  localStorage.removeItem("playlistOptions");
-}
-
-// Create playlist on Spotify
-createBtn.addEventListener("click", async () => {
-  if (!currentPlaylist) return;
+  const trackUris = currentPlaylist.tracks.map((t) => t?.uri).filter(Boolean);
+  if (trackUris.length === 0) {
+    setStatus("❌ Tracks missing URIs (cannot add to Spotify).");
+    return;
+  }
 
   createBtn.disabled = true;
-  createdEl.textContent = "Creating playlist...";
+  setStatus("Creating playlist in Spotify...");
 
   try {
-    const trackUris = currentPlaylist.tracks.map((t) => t.uri);
-    const { playlist, result } = await createMoodTunesPlaylist({
-      name: currentPlaylist.name,
-      description: currentPlaylist.description,
+    const res = await createMoodTunesPlaylist({
+      name: currentPlaylist.name || "MoodTunes Playlist",
+      description: currentPlaylist.description || "Generated by MoodTunes",
       trackUris,
     });
 
-    if (isAuthenticated()) {
-      createdEl.innerHTML = `✅ Created! <a href="${playlist.external_urls.spotify}" target="_blank">Open in Spotify</a>`;
-    } else {
-      createdEl.textContent = `✅ Created (${result.added} tracks)`;
+    const created = res?.playlist || res;
+    const url = created?.external_urls?.spotify || "";
+
+    if (createdEl) {
+      createdEl.innerHTML = `✅ Created! ${
+        url ? `<a href="${url}" target="_blank" rel="noreferrer">Open in Spotify</a>` : ""
+      }`;
     }
   } catch (err) {
     console.error(err);
-    createdEl.textContent = `❌ Error: ${err.message}`;
+    setStatus(`❌ Failed to create playlist: ${err?.message || String(err)}`);
   } finally {
     createBtn.disabled = false;
   }
+}
+
+// Events
+createBtn?.addEventListener("click", handleCreate);
+
+customizeBtn?.addEventListener("click", () => {
+  window.location.assign("./mood-options.html");
 });
 
-// Go back to customize
-customizeBtn.addEventListener("click", () => {
-  window.location.href = "mood-options.html";
-});
-
-// Initialize on page load
-loadAndGeneratePlaylist();
+// Init
+(async function init() {
+  await showUserInfo();
+  await loadAndGeneratePlaylist();
+})();

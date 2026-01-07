@@ -1,64 +1,63 @@
 // js/auth.js
-import {
-  isAuthenticated,
-  initiateLogin,
-  handleCallback,
-  logout as spotifyLogout,
-} from "../spotify/spotify.auth.js";
-import { spotify } from "../spotify/spotify.adapter.js";
+import { initiateLogin, handleCallback, isAuthenticated, logout } from "../spotify/spotify.auth.js";
 
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout-btn");
-const continueBtn = document.getElementById("continue-btn");
-const userInfo = document.getElementById("user-info");
-const userName = document.getElementById("user-name");
+const statusEl = document.getElementById("status");
+const continueBtn = document.getElementById("continue-btn"); // optional in HTML
 
-// Handle OAuth callback
-async function initAuth() {
+function setStatus(msg) {
+  if (statusEl) statusEl.textContent = msg || "";
+}
+
+// Helper: safe redirect (same folder)
+function goToMoodOptions() {
+  window.location.assign("./scan.html");
+}
+
+async function init() {
   try {
-    const handled = await handleCallback();
-    if (handled) {
-      await updateAuthUI();
+    // 1) If we returned from Spotify, handle callback once
+    const didCallback = await handleCallback();
+    if (didCallback) {
+      setStatus("✅ Login gelukt! Doorsturen...");
+      goToMoodOptions();
+      return;
+    }
+
+    // 2) Normal page load
+    if (isAuthenticated()) {
+      setStatus("✅ Ingelogd. Je kunt doorgaan.");
+      if (continueBtn) continueBtn.style.display = "inline-block";
     } else {
-      await updateAuthUI();
+      setStatus("Niet ingelogd");
+      if (continueBtn) continueBtn.style.display = "none";
     }
-  } catch (err) {
-    console.error("Authentication error:", err);
+  } catch (e) {
+    console.error(e);
+    setStatus(`❌ Auth error: ${e?.message || String(e)}`);
   }
 }
 
-async function updateAuthUI() {
-  const authenticated = isAuthenticated();
-
-  if (authenticated) {
-    try {
-      const user = await spotify.getMe();
-      userName.textContent = user.display_name || user.id;
-      loginBtn.style.display = "none";
-      userInfo.style.display = "block";
-    } catch (err) {
-      console.error("Failed to get user info:", err);
-      loginBtn.style.display = "block";
-      userInfo.style.display = "none";
-    }
-  } else {
-    loginBtn.style.display = "block";
-    userInfo.style.display = "none";
+// Click handlers
+loginBtn?.addEventListener("click", async () => {
+  try {
+    setStatus("Redirecting to Spotify...");
+    await initiateLogin(); // this redirects
+  } catch (e) {
+    console.error(e);
+    setStatus(`❌ Login failed: ${e?.message || String(e)}`);
   }
-}
-
-loginBtn.addEventListener("click", () => {
-  initiateLogin();
 });
 
-logoutBtn.addEventListener("click", () => {
-  spotifyLogout();
-  updateAuthUI();
+logoutBtn?.addEventListener("click", () => {
+  logout();
+  setStatus("Uitgelogd + tokens gewist. Refresh de pagina.");
+  if (continueBtn) continueBtn.style.display = "none";
 });
 
-continueBtn.addEventListener("click", () => {
-  window.location.href = "scan.html";
+continueBtn?.addEventListener("click", () => {
+  if (isAuthenticated()) goToMoodOptions();
 });
 
-// Initialize on page load
-initAuth();
+init();
