@@ -89,6 +89,3 @@ export async function createPlaylist({ name, description, isPublic = false }) {
 
 // Add tracks to a playlist
 export async function addTracksToPlaylist({ playlistId, uris }) {}
-
-// Search for tracks (useful for future features)
-export async function searchTracks(query, limit = 20) {}
