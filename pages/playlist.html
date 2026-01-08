@@ -1,3 +1,4 @@
+<!-- pages/playlist.html -->
 <!DOCTYPE html>
 <html lang="nl">
   <head>
@@ -7,31 +8,39 @@
     <link rel="stylesheet" href="../styles.css" />
   </head>
 
-  <body>
-    <header class="container">
-      <h1>MoodTunes</h1>
-      <div id="user-info" class="muted"></div>
-    </header>
+  <body class="app-body">
+    <main class="container dark">
+      <!-- Top bar -->
+      <header class="topbar">
+        <button id="customize-btn" class="back-btn" type="button">← Back</button>
 
-    <main class="container">
-      <section class="card">
-        <h2>Your Playlist</h2>
-        <p id="playlist-name" class="playlist-name"></p>
+        <!-- <div class="topbar-right">
+          <div id="user-info" class="user-info"></div>
+        </div> -->
+      </header>
 
-        <div class="tracks-container">
-          <ul id="tracks"></ul>
-        </div>
-
-        <div class="action-section">
-          <button id="create-btn" class="btn btn-primary">
-            ➕ Add to Spotify
-          </button>
-          <button id="customize-btn" class="btn btn-secondary">
-            🔄 Customize Again
-          </button>
-          <p id="created" class="muted"></p>
-        </div>
+      <!-- Title -->
+      <section class="hero">
+        <h1 class="hero-title">Your playlist</h1>
+        <p id="playlist-name" class="hero-subtitle"></p>
       </section>
+
+      <!-- Tracks -->
+      <section class="list-wrap">
+        <ol id="tracks" class="tracklist"></ol>
+      </section>
+
+      <!-- Action -->
+      <section class="action-bar">
+        <button id="create-btn" class="btn btn-primary btn-full">
+          Add to Spotify
+        </button>
+      </section>
+
+      <!-- Status -->
+      <footer class="footer">
+        <!-- <p id="created" class="status"></p> -->
+      </footer>
     </main>
 
     <script type="module" src="../js/playlist.js"></script>
