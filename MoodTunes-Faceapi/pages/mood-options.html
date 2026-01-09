@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoodTunes - Customize Playlist</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body>
+  <header class="container">
+    <h1>MoodTunes</h1>
+    <h2>Bedankt voor het scannen!</h2>
+    <p>Jouw gedetecteerde stemming is: <span id="mood-result" style="font-weight: bold; color: blue;">Laden...</span>
+    </p>
+
+    <a href="index.html">Opnieuw scannen</a>
+    <div id="user-info" class="muted"></div>
+    <p id="error" class="muted" style="color: #b00020;"></p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Customize Your Playlist</h2>
+      <p class="muted">Choose your mood and intent (playlist is always 15 tracks)</p>
+
+      <div class="options-grid">
+        <label>
+          <span>Mood:</span>
+          <select id="mood" class="input-field">
+            <option value="happy">Happy</option>
+            <option value="angry">Angry</option>
+            <option value="sad">Sad</option>
+            <option value="fearful">Fearful</option>
+            <option value="disgusted">Disgusted</option>
+            <option value="surprised">Surprised</option>
+            <option value="neutral">Neutral</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Intent:</span>
+          <select id="intent" class="input-field">
+            <option value="go-with-flow">Go with the flow</option>
+            <option value="turn-it-up">Turn it up</option>
+            <option value="take-it-easy">Take it easy</option>
+            <option value="stay-focused">Stay focused</option>
+            <option value="change-the-mood">Change the mood</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="generate-btn" class="btn btn-large">🎵 Generate Playlist</button>
+    </section>
+  </main>
+
+  <script type="module" src="../js/mood-options.js"></script>
+  <script>
+    // Wacht tot de pagina geladen is
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Haal de opgeslagen emotie op (bijv. "happy (95%)")
+      const gescandeEmotieData = localStorage.getItem("gescandeEmotie");
+
+      const moodDisplay = document.getElementById("mood-result");
+      const moodSelect = document.getElementById("mood"); // Het dropdown element
+
+      if (gescandeEmotieData) {
+        // 2. Toon de volledige tekst bovenin (bijv: "happy (95%)")
+        moodDisplay.innerText = gescandeEmotieData;
+
+        // 3. Haal alleen de naam eruit voor de dropdown (bijv: "happy")
+        const alleenEmotie = gescandeEmotieData.split(' ')[0].toLowerCase();
+
+        // 4. Pas de dropdown automatisch aan
+        if (moodSelect) {
+          // We zoeken de optie die precies matcht met de gescande naam
+          const optionToSelect = moodSelect.querySelector(`option[value="${alleenEmotie}"]`);
+          if (optionToSelect) {
+            moodSelect.value = alleenEmotie;
+            console.log("Dropdown automatisch ingesteld op: " + alleenEmotie);
+          }
+        }
+      } else {
+        moodDisplay.innerText = "Geen scan gevonden.";
+      }
+    });
+  </script>
+</body>
+
+</html>
