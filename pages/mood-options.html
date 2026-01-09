@@ -8,9 +8,7 @@
   </head>
 
   <body>
-    <header class="container">
-      <h1>MoodTunes</h1>
-      <h2>Bedankt voor het scannen!</h2>
+    <main class="container light">
       <p>
         Jouw gedetecteerde stemming is:
         <span id="mood-result" style="font-weight: bold; color: blue"
@@ -18,28 +16,19 @@
         >
       </p>
 
-      <a href="index.html">Opnieuw scannen</a>
-      <div id="user-info" class="muted"></div>
+      <a href="scan.html">Opnieuw scannen</a>
+      <!-- <div id="user-info" class="muted"></div> -->
       <p id="error" class="muted" style="color: #b00020"></p>
-    </header>
-  <body class="">
-  
-
-    <main class="container light">
-
-
 
       <section class="card">
-        <h2>Customize Your Playlist</h2>
+        <h2>Choose your mood</h2>
         <p class="muted">
           Choose your mood and intent (playlist is always 15 tracks)
         </p>
-        <h2>Choose your mood</h2>
-        <p class="muted">Choose your mood and intent (playlist is always 15 tracks)</p>
 
         <div class="options-grid">
-         <label>
-             <span>Mood:</span>
+          <!-- <label>
+            <span>Mood:</span>
             <select id="mood" class="input-field">
               <option value="happy">Happy</option>
               <option value="angry">Angry</option>
@@ -49,7 +38,7 @@
               <option value="surprised">Surprised</option>
               <option value="neutral">Neutral</option>
             </select>
-          </label>
+          </label> -->
 
           <label>
             <span>Intent:</span>
@@ -63,7 +52,9 @@
           </label>
         </div>
 
-        <button id="generate-btn" class="btn btn-primary">Generate Playlist</button>
+        <button id="generate-btn" class="btn btn-primary">
+          Generate Playlist
+        </button>
       </section>
     </main>
 
