@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Face API Starter</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        /* De container zorgt dat video en canvas op dezelfde plek starten */
+        #media-container {
+            position: relative;
+            width: 720px;
+            height: 560px;
+            margin-top: 20px;
+            border: 2px solid #333;
+        }
+
+        video,
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Face API Detectie</h1>
+
+    <button id="start-camera">Start Camera</button>
+    <button id="stop-camera" disabled>Stop Camera</button>
+
+    <div id="media-container" style="position: relative;">
+        <video id="video-feed" width="720" height="560" autoplay muted></video>
+        <canvas id="canvas" width="720" height="560" style="position: absolute; top: 0; left: 0;"></canvas>
+    </div>
+
+    <script src="./face-api.min.js"></script>
+    <script src="./scripts.js"></script>
+</body>
+
+</html>
