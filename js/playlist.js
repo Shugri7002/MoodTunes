@@ -12,12 +12,29 @@ const createdEl = document.getElementById("created");
 const userInfo = document.getElementById("user-info");
 
 const OPTIONS_KEY = "playlistOptions";
-const FINAL_LIMIT = 15; // ✅ always 15
+const FINAL_LIMIT = 15;
 
 let currentPlaylist = null;
 
-function setStatus(msg) {
-  if (createdEl) createdEl.textContent = msg || "";
+function setStatus(msg, ok = false) {
+  if (!createdEl) return;
+  if (!msg) {
+    createdEl.textContent = "";
+    createdEl.innerHTML = "";
+    return;
+  }
+  createdEl.innerHTML = ok
+    ? `${msg} <span class="status-badge" aria-hidden="true"></span>`
+    : msg;
+}
+
+function msToTime(ms) {
+  const n = Number(ms);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  const totalSec = Math.floor(n / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 async function showUserInfo() {
@@ -37,6 +54,23 @@ async function showUserInfo() {
   }
 }
 
+function getOptions() {
+  const raw = localStorage.getItem(OPTIONS_KEY);
+  if (!raw) return null;
+
+  try {
+    const obj = JSON.parse(raw);
+    return {
+      mood: obj?.mood || "neutral",
+      intent: obj?.intent || "go-with-flow",
+      limit: FINAL_LIMIT,
+    };
+  } catch (e) {
+    console.error("Failed to parse playlistOptions:", e);
+    return null;
+  }
+}
+
 function renderTracks(tracks = []) {
   if (!tracksEl) return;
   tracksEl.innerHTML = "";
@@ -50,39 +84,46 @@ function renderTracks(tracks = []) {
 
   tracks.forEach((t, i) => {
     const li = document.createElement("li");
-    const title = t?.name || "Unknown title";
+    li.className = "track-row";
 
-    // accept both: artists string OR array
-    let artists = "";
-    if (Array.isArray(t?.artists)) {
-      artists = t.artists.map((a) => (typeof a === "string" ? a : a?.name)).filter(Boolean).join(", ");
-    } else if (typeof t?.artists === "string") {
-      artists = t.artists;
-    } else if (typeof t?.artist === "string") {
-      artists = t.artist;
+    const num = document.createElement("div");
+    num.className = "track-num";
+    num.textContent = String(i + 1);
+
+    const cover = document.createElement("div");
+    cover.className = "cover";
+    if (t?.imageUrl) {
+      const img = document.createElement("img");
+      img.src = t.imageUrl;
+      img.alt = `${t?.name || "Track"} cover`;
+      cover.appendChild(img);
     }
 
-    li.textContent = `${i + 1}. ${title}${artists ? " — " + artists : ""}`;
+    const main = document.createElement("div");
+    main.className = "track-main";
+
+    const title = document.createElement("div");
+    title.className = "track-title";
+    title.textContent = t?.name || "Unknown title";
+
+    const artist = document.createElement("div");
+    artist.className = "track-artist";
+    artist.textContent = t?.artists || "";
+
+    main.appendChild(title);
+    main.appendChild(artist);
+
+    const time = document.createElement("div");
+    time.className = "track-time";
+    time.textContent = msToTime(t?.duration_ms);
+
+    li.appendChild(num);
+    li.appendChild(cover);
+    li.appendChild(main);
+    li.appendChild(time);
+
     tracksEl.appendChild(li);
   });
-}
-
-function getOptions() {
-  const raw = localStorage.getItem(OPTIONS_KEY);
-  if (!raw) return null;
-
-  try {
-    const obj = JSON.parse(raw);
-    return {
-      mood: obj?.mood || "neutral",
-      intent: obj?.intent || "go-with-flow",
-      // ✅ force 15 always
-      limit: FINAL_LIMIT,
-    };
-  } catch (e) {
-    console.error("Failed to parse playlistOptions:", e);
-    return null;
-  }
 }
 
 async function loadAndGeneratePlaylist() {
@@ -93,7 +134,7 @@ async function loadAndGeneratePlaylist() {
       return;
     }
 
-    setStatus(isAuthenticated() ? "Generating playlist..." : "Not logged in — generating preview...");
+    setStatus(isAuthenticated() ? "Generating playlist..." : "Not logged in — preview only...");
 
     const playlist = await generatePlaylist(opts);
     currentPlaylist = playlist || null;
@@ -108,16 +149,19 @@ async function loadAndGeneratePlaylist() {
       return;
     }
 
-    // UI title
+    // ✅ playlist name visible
     playlistNameEl.textContent = `${currentPlaylist.name || "Playlist"} — ${tracks.length} tracks`;
+
     renderTracks(tracks);
 
-    // Create button logic
-    const hasUris = tracks.some((t) => Boolean(t?.uri));
+    const hasUris = tracks.some((x) => !!x?.uri);
     const canCreate = isAuthenticated() && hasUris;
 
     if (createBtn) createBtn.disabled = !canCreate;
-    setStatus(canCreate ? "Ready to add to Spotify ✅" : "Login required to add to Spotify.");
+
+    setStatus(
+      canCreate
+    );
   } catch (err) {
     console.error("Error generating playlist:", err);
     playlistNameEl.textContent = "Error generating playlist";
@@ -154,11 +198,10 @@ async function handleCreate() {
     const created = res?.playlist || res;
     const url = created?.external_urls?.spotify || "";
 
-    if (createdEl) {
-      createdEl.innerHTML = `✅ Created! ${
-        url ? `<a href="${url}" target="_blank" rel="noreferrer">Open in Spotify</a>` : ""
-      }`;
-    }
+    setStatus(
+      `Created! ${url ? `<a href="${url}" target="_blank" rel="noreferrer">Open in Spotify</a>` : ""}`,
+      true
+    );
   } catch (err) {
     console.error(err);
     setStatus(`❌ Failed to create playlist: ${err?.message || String(err)}`);
@@ -167,14 +210,9 @@ async function handleCreate() {
   }
 }
 
-// Events
 createBtn?.addEventListener("click", handleCreate);
+customizeBtn?.addEventListener("click", () => window.location.assign("./mood-options.html"));
 
-customizeBtn?.addEventListener("click", () => {
-  window.location.assign("./mood-options.html");
-});
-
-// Init
 (async function init() {
   await showUserInfo();
   await loadAndGeneratePlaylist();
