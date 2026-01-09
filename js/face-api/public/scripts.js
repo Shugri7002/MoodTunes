@@ -1,61 +1,63 @@
-const startButton = document.getElementById("start-camera");
-const stopButton = document.getElementById("stop-camera");
 const videoFeedEl = document.getElementById("video-feed");
 const canvas = document.getElementById("canvas");
+const continueButton = document.getElementById("continue-button");
 
 let currentStream = null;
 let detectionInterval = null;
+let lastDetectedEmotion = "Nog geen emotie gedetecteerd";
 
-async function loadModels() {
+// --- CONTINUE KNOP LOGICA (Slechts één keer nodig) ---
+continueButton.addEventListener("click", () => {
+  // Sla de laatst gemeten emotie op
+  localStorage.setItem("gescandeEmotie", lastDetectedEmotion);
+
+  // Stuur de gebruiker naar de volgende pagina
+  // Kies hier de juiste pagina (bijv. mood-options.html)
+  window.location.href = "mood-options.html";
+});
+
+// --- INITIALISATIE ---
+async function init() {
   console.log("Modellen laden...");
-  await Promise.all([
-    faceapi.nets.ssdMobilenetv1.loadFromUri("../js/face-api/public/models"),
-    faceapi.nets.faceLandmark68Net.loadFromUri("../js/face-api/public/models"),
-    faceapi.nets.faceRecognitionNet.loadFromUri("../js/face-api/public/models"),
-    faceapi.nets.ageGenderNet.loadFromUri("../js/face-api/public/models"),
-    faceapi.nets.faceExpressionNet.loadFromUri("../js/face-api/public/models"),
-  ]);
-  console.log("Modellen klaar.");
-}
-loadModels();
-
-startButton.addEventListener("click", async () => {
   try {
-    startButton.disabled = true;
-    startButton.innerText = "Laden...";
+    await Promise.all([
+      faceapi.nets.ssdMobilenetv1.loadFromUri("../js/face-api/public/models"),
+      faceapi.nets.faceLandmark68Net.loadFromUri(
+        "../js/face-api/public/models"
+      ),
+      faceapi.nets.faceRecognitionNet.loadFromUri(
+        "../js/face-api/public/models"
+      ),
+      faceapi.nets.ageGenderNet.loadFromUri("../js/face-api/public/models"),
+      faceapi.nets.faceExpressionNet.loadFromUri(
+        "../js/face-api/public/models"
+      ),
+    ]);
+    console.log("Modellen klaar. Camera starten...");
+    startCamera();
+  } catch (err) {
+    console.error("Fout bij laden modellen:", err);
+  }
+}
+
+// --- CAMERA STARTEN ---
+async function startCamera() {
+  try {
     currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
     videoFeedEl.srcObject = currentStream;
 
-    // Wacht tot de video echt speelt voordat we detectie starten
     videoFeedEl.onloadedmetadata = () => {
       startDetection();
-      startButton.innerText = "Camera Actief";
-      stopButton.disabled = false;
+      console.log("Detectie gestart");
     };
   } catch (err) {
-    console.error("Fout:", err);
-    startButton.disabled = false;
-    startButton.innerText = "Start Camera";
+    console.error("Camera fout:", err);
   }
-});
+}
 
-stopButton.addEventListener("click", () => {
-  if (detectionInterval) clearInterval(detectionInterval);
-  if (currentStream) {
-    currentStream.getTracks().forEach((track) => track.stop());
-  }
-  videoFeedEl.srcObject = null;
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  startButton.disabled = false;
-  startButton.innerText = "Start Camera";
-  stopButton.disabled = true;
-});
-
+// --- EMOTIE DETECTIE LUS ---
 function startDetection() {
   const displaySize = { width: videoFeedEl.width, height: videoFeedEl.height };
-  // De 'true' zorgt dat het canvas element ook echt die pixels krijgt
   faceapi.matchDimensions(canvas, displaySize);
 
   detectionInterval = setInterval(async () => {
@@ -71,8 +73,7 @@ function startDetection() {
         })
       )
       .withFaceLandmarks()
-      .withFaceExpressions()
-      .withAgeAndGender();
+      .withFaceExpressions();
 
     const resizedDetections = faceapi.resizeResults(detections, displaySize);
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
@@ -80,7 +81,7 @@ function startDetection() {
     resizedDetections.forEach((detection) => {
       const expressions = detection.expressions;
 
-      // De boost logica
+      // Jouw boost logica
       const customExpressions = {
         ...expressions,
         angry: expressions.angry * 2.5,
@@ -95,25 +96,18 @@ function startDetection() {
         Math.min(customExpressions[dominantExpression] * 100, 100)
       );
 
-      faceapi.draw.drawDetections(canvas, resizedDetections);
-      //   faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      // Werk de variabele bij die we gebruiken bij het klikken op 'Continue'
+      lastDetectedEmotion = `${dominantExpression} (${confidence}%)`;
 
-      // Bovenkant box: Emotie
+      // Teken de resultaten op het canvas
+      faceapi.draw.drawDetections(canvas, resizedDetections);
       new faceapi.draw.DrawTextField(
         [`Emotie: ${dominantExpression} (${confidence}%)`],
         detection.detection.box.topLeft
       ).draw(canvas);
-
-      // Onderkant box: Leeftijd en Geslacht
-      //   new faceapi.draw.DrawTextField(
-      //     [
-      //       `${Math.round(detection.age)} jaar`,
-      //       `${detection.gender} (${Math.round(
-      //         detection.genderProbability * 100
-      //       )}%)`,
-      //     ],
-      //     detection.detection.box.bottomLeft
-      //   ).draw(canvas);
     });
   }, 100);
 }
+
+// Start het proces
+init();
