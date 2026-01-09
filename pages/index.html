@@ -1,35 +1,251 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MoodTunes - Login</title>
+    <title>MoodTunes - Scan Your Emotions</title>
     <link rel="stylesheet" href="../styles.css" />
+    <style>
+      /* Page wrapper for decorations */
+      .index-page {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Decorative elements - scaled for mobile */
+      .decor-checker {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 120px;
+        height: 120px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        z-index: 1;
+      }
+
+      .checker-cell {
+        background-color: #5b5b7a;
+      }
+
+      .checker-cell:nth-child(1),
+      .checker-cell:nth-child(3),
+      .checker-cell:nth-child(6),
+      .checker-cell:nth-child(8),
+      .checker-cell:nth-child(9),
+      .checker-cell:nth-child(11),
+      .checker-cell:nth-child(14),
+      .checker-cell:nth-child(16) {
+        background-color: transparent;
+      }
+
+      .decor-001 {
+        position: absolute;
+        right: -20px;
+        top: 55%;
+        transform: translateY(-50%);
+        font-size: 100px;
+        font-weight: 900;
+        color: transparent;
+        -webkit-text-stroke: 1.5px #8b9a5c;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        letter-spacing: -5px;
+        z-index: 1;
+        opacity: 0.7;
+      }
+
+      .decor-circle-left {
+        position: absolute;
+        bottom: -80px;
+        left: -80px;
+        width: 220px;
+        height: 220px;
+        border: 1.5px solid #8b9a5c;
+        border-radius: 50%;
+        z-index: 1;
+      }
+
+      .decor-circle-right {
+        position: absolute;
+        bottom: -60px;
+        right: -60px;
+        width: 160px;
+        height: 160px;
+        border: 1.5px solid #8b9a5c;
+        border-radius: 50%;
+        z-index: 1;
+      }
+
+      /* Main content */
+      .main-content {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 40px 25px;
+        min-height: 100vh;
+      }
+
+      .headline {
+        font-size: 2.2rem;
+        color: #fff;
+        line-height: 1.15;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        font-size: 2.2rem;
+        font-family: "Dela Gothic One", sans-serif;
+        margin-bottom: 60px;
+        display: flex;
+        align-items: center;
+      }
+
+      .logo-m {
+        color: var(--primary-color);
+      }
+
+      .logo-oo {
+        display: inline-flex;
+        align-items: center;
+        margin: 0 2px;
+      }
+
+      .logo-oo svg {
+        width: 48px;
+        height: auto;
+        vertical-align: middle;
+        margin-top: 5px;
+      }
+
+      .logo-d {
+        color: var(--primary-color);
+      }
+
+      .logo-tunes {
+        color: var(--primary-color);
+      }
+
+      .cta-btn {
+        display: inline-block;
+        background-color: #b8f560;
+        color: #1a1a1a;
+        padding: 16px 32px;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: fit-content;
+      }
+
+      .cta-btn:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 20px rgba(184, 245, 96, 0.25);
+      }
+
+      /* Auth elements */
+      #user-info {
+        display: none;
+        margin-top: 20px;
+      }
+
+      #user-info.visible {
+        display: block;
+      }
+
+      .user-name {
+        color: #888;
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+      }
+
+      .btn-logout {
+        background: transparent;
+        border: 1px solid #555;
+        color: #777;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        margin-left: 10px;
+        transition: all 0.2s;
+      }
+
+      .btn-logout:hover {
+        border-color: #b8f560;
+        color: #b8f560;
+      }
+    </style>
   </head>
 
-    <main class="container light">
-
-  <body class="app-body">
-    <div class="hero-bg">
-      <h1>MoodTunes</h1>
-      <p>
-        Scan your mood with moodtunes!
-      </p>
-      <div class="inner">
-          <div id="auth-section">
-            <button id="login-btn" class="btn btn-large">
-               Login with Spotify
-            </button>
-            <div id="user-info" style="display: none">
-              <p class="muted">Logged in as: <span id="user-name"></span></p>
-              <button id="continue-btn" class="btn btn-large">
-                Continue to App →
-              </button>
-              <button id="logout-btn" class="btn btn-secondary">Logout</button>
-            </div>
-          </div>
-        </div>
+  <body>
+    <div class="index-page container dark">
+      <!-- Decorative elements -->
+      <div class="decor-checker">
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
+        <div class="checker-cell"></div>
       </div>
+
+      <div class="decor-001">001</div>
+      <div class="decor-circle-left"></div>
+      <div class="decor-circle-right"></div>
+
+      <!-- Main content -->
+      <main class="main-content">
+        <h1 class="headline">
+          Scan your<br />
+          emotions with
+        </h1>
+
+        <div class="logo">
+          <span class="logo-m">M</span>
+          <span class="logo-oo">
+            <svg
+              width="55"
+              height="22"
+              viewBox="0 0 55 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M55 11.0123C55 18.3374 49.4354 22 38.3061 22L16.6939 22C11.6199 22 7.57507 21.0271 4.5594 19.0814C1.5198 17.1356 0 14.4459 0 11.0123C0 7.56224 1.5198 4.86436 4.5594 2.91862C7.57507 0.972873 11.6199 -5.96046e-07 16.6939 -5.96046e-07L38.3061 -5.96046e-07C49.4354 -5.96046e-07 55 3.67075 55 11.0123ZM45.0914 11.0123C45.0914 10.2765 44.7084 9.75325 43.9426 9.44259C43.1527 9.11557 42.1595 8.95206 40.9628 8.95206H14.6475C11.5122 8.95206 9.94452 9.6388 9.94452 11.0123C9.94452 12.3857 11.5122 13.0725 14.6475 13.0725H40.9628C42.1595 13.0725 43.1527 12.9171 43.9426 12.6065C44.7084 12.2794 45.0914 11.748 45.0914 11.0123Z"
+                fill="#CAFF8A"
+              />
+            </svg>
+          </span>
+          <span class="logo-d">d</span>
+          <span class="logo-tunes">Tunes</span>
+        </div>
+
+        <button id="login-btn" class="cta-btn">Get your playlist</button>
+
+        <div id="user-info">
+          <p class="user-name">Logged in as: <span id="user-name"></span></p>
+          <button id="continue-btn" class="cta-btn">Continue →</button>
+          <button id="logout-btn" class="btn-logout">Logout</button>
+        </div>
+      </main>
     </div>
 
     <script type="module" src="../js/auth.js"></script>

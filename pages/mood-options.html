@@ -5,90 +5,224 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MoodTunes - Customize Playlist</title>
     <link rel="stylesheet" href="../styles.css" />
+    <style>
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: #000;
+        text-decoration: none;
+        font-weight: 900;
+        font-size: 1rem;
+        margin-bottom: 60px;
+      }
+
+      .back-link:hover {
+        opacity: 0.7;
+      }
+
+      .container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 30px;
+      }
+
+      .mood-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        text-align: center;
+        margin-bottom: 12px;
+        color: #000;
+      }
+
+      .mood-subtitle {
+        text-align: center;
+        font-weight: 400;
+        font-family: Arial, sans-serif;
+        color: #333;
+        margin-bottom: 40px;
+        font-size: 1rem;
+      }
+
+      .intent-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .intent-option {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 15px 20px;
+        border: 1px solid #000;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .intent-option:hover {
+        background: #f5f5f0;
+      }
+
+      .intent-option.selected {
+        background: #c8f560;
+      }
+
+      .intent-option input[type="radio"] {
+        display: none;
+      }
+
+      .checkbox-visual {
+        width: 28px;
+        height: 28px;
+        border: 1px solid #000;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .intent-option.selected .checkbox-visual::after {
+        content: "✕";
+        font-size: 18px;
+        font-weight: 900;
+        color: #000;
+      }
+
+      .intent-label {
+        font-weight: 900;
+        font-size: 1.1rem;
+        color: #000;
+      }
+
+      #error {
+        color: #b00020;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      /* Hidden elements */
+      #mood-result {
+        display: none;
+      }
+
+      .generate-btn {
+        display: block;
+        margin: 30px auto 0;
+      }
+
+      .generate-btn:hover {
+        opacity: 0.85;
+      }
+
+      .generate-btn:disabled {
+        background: #999;
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    </style>
   </head>
 
   <body>
-    <main class="container light">
-      <p>
-        Jouw gedetecteerde stemming is:
-        <span id="mood-result" style="font-weight: bold; color: blue"
-          >Laden...</span
-        >
+    <div class="container light">
+      <a href="scan.html" class="back-link">← Back</a>
+
+      <p id="error" class="muted"></p>
+
+      <h1 class="mood-title">You're <span id="mood-display">happy</span></h1>
+      <p class="mood-subtitle">
+        Choose how you want to respond to this feeling.
       </p>
 
-      <a href="scan.html">Opnieuw scannen</a>
-      <!-- <div id="user-info" class="muted"></div> -->
-      <p id="error" class="muted" style="color: #b00020"></p>
+      <div class="intent-options">
+        <label class="intent-option" data-value="turn-it-up">
+          <input type="radio" name="intent" value="turn-it-up" />
+          <div class="checkbox-visual"></div>
+          <span class="intent-label">Turn it up</span>
+        </label>
 
-      <section class="card">
-        <h2>Choose your mood</h2>
-        <p class="muted">
-          Choose your mood and intent (playlist is always 15 tracks)
-        </p>
+        <label class="intent-option" data-value="take-it-easy">
+          <input type="radio" name="intent" value="take-it-easy" />
+          <div class="checkbox-visual"></div>
+          <span class="intent-label">Take it easy</span>
+        </label>
 
-        <div class="options-grid">
-          <!-- <label>
-            <span>Mood:</span>
-            <select id="mood" class="input-field">
-              <option value="happy">Happy</option>
-              <option value="angry">Angry</option>
-              <option value="sad">Sad</option>
-              <option value="fearful">Fearful</option>
-              <option value="disgusted">Disgusted</option>
-              <option value="surprised">Surprised</option>
-              <option value="neutral">Neutral</option>
-            </select>
-          </label> -->
+        <label class="intent-option" data-value="stay-focused">
+          <input type="radio" name="intent" value="stay-focused" />
+          <div class="checkbox-visual"></div>
+          <span class="intent-label">Stay focused</span>
+        </label>
 
-          <label>
-            <span>Intent:</span>
-            <select id="intent" class="input-field">
-              <option value="go-with-flow">Go with the flow</option>
-              <option value="turn-it-up">Turn it up</option>
-              <option value="take-it-easy">Take it easy</option>
-              <option value="stay-focused">Stay focused</option>
-              <option value="change-the-mood">Change the mood</option>
-            </select>
-          </label>
-        </div>
+        <label class="intent-option" data-value="go-with-flow">
+          <input type="radio" name="intent" value="go-with-flow" />
+          <div class="checkbox-visual"></div>
+          <span class="intent-label">Go with the flow</span>
+        </label>
 
-        <button id="generate-btn" class="btn btn-primary">
-          Generate Playlist
-        </button>
-      </section>
-    </main>
+        <label class="intent-option" data-value="change-the-mood">
+          <input type="radio" name="intent" value="change-the-mood" />
+          <div class="checkbox-visual"></div>
+          <span class="intent-label">Change the mood</span>
+        </label>
+      </div>
+
+      <button id="generate-btn" class="btn btn-primary generate-btn" disabled>
+        Generate Playlist
+      </button>
+
+      <!-- Hidden elements for JS compatibility -->
+      <span id="mood-result"></span>
+      <select id="intent" style="display: none"></select>
+    </div>
 
     <script type="module" src="../js/mood-options.js"></script>
     <script>
-      // Wacht tot de pagina geladen is
       document.addEventListener("DOMContentLoaded", () => {
-        // 1. Haal de opgeslagen emotie op (bijv. "happy (95%)")
         const gescandeEmotieData = localStorage.getItem("gescandeEmotie");
+        const moodDisplay = document.getElementById("mood-display");
+        const intentOptions = document.querySelectorAll(".intent-option");
+        const generateBtn = document.getElementById("generate-btn");
 
-        const moodDisplay = document.getElementById("mood-result");
-        const moodSelect = document.getElementById("mood"); // Het dropdown element
-
+        // Set detected mood
         if (gescandeEmotieData) {
-          // 2. Toon de volledige tekst bovenin (bijv: "happy (95%)")
-          moodDisplay.innerText = gescandeEmotieData;
-
-          // 3. Haal alleen de naam eruit voor de dropdown (bijv: "happy")
           const alleenEmotie = gescandeEmotieData.split(" ")[0].toLowerCase();
-
-          // 4. Pas de dropdown automatisch aan
-          if (moodSelect) {
-            // We zoeken de optie die precies matcht met de gescande naam
-            const optionToSelect = moodSelect.querySelector(
-              `option[value="${alleenEmotie}"]`
-            );
-            if (optionToSelect) {
-              moodSelect.value = alleenEmotie;
-              console.log("Dropdown automatisch ingesteld op: " + alleenEmotie);
-            }
-          }
+          moodDisplay.innerText = alleenEmotie;
+          localStorage.setItem("selectedMood", alleenEmotie);
         } else {
-          moodDisplay.innerText = "Geen scan gevonden.";
+          moodDisplay.innerText = "neutral";
         }
+
+        // Handle intent selection - select only, enable button
+        intentOptions.forEach((option) => {
+          option.addEventListener("click", () => {
+            intentOptions.forEach((o) => o.classList.remove("selected"));
+            option.classList.add("selected");
+            option.querySelector('input[type="radio"]').checked = true;
+
+            // Enable the generate button
+            generateBtn.disabled = false;
+          });
+        });
+
+        // Navigate only on Generate button click
+        generateBtn.addEventListener("click", () => {
+          const mood = moodDisplay.innerText;
+          const selectedOption = document.querySelector(
+            ".intent-option.selected"
+          );
+          if (!selectedOption) return;
+
+          const intent = selectedOption.dataset.value;
+
+          localStorage.setItem(
+            "playlistOptions",
+            JSON.stringify({ mood, intent, limit: 15 })
+          );
+
+          window.location.assign("./playlist.html");
+        });
       });
     </script>
   </body>

@@ -25,9 +25,15 @@ export const UI_INTENTS = [
 
 // Internal buckets
 export const CORE_MOODS = ["happy", "chill", "sad", "focus"];
-export const CORE_INTENTS = ["turn-it-up", "take-it-easy", "stay-focused", "go-with-flow"];
+export const CORE_INTENTS = [
+  "turn-it-up",
+  "take-it-easy",
+  "stay-focused",
+  "go-with-flow",
+];
 
-// -------------------- Core mapping (your original) --------------------
+// -------------------- Core mapping with min/max constraints --------------------
+// target_* = preference, min_*/max_* = hard requirements
 export const MAPPING = {
   happy: {
     "turn-it-up": {
@@ -35,32 +41,33 @@ export const MAPPING = {
       target_valence: 0.85,
       target_danceability: 0.8,
       target_tempo: 128,
-      target_acousticness: 0.15,
-      target_instrumentalness: 0.05,
+      min_energy: 0.7, // FORCE high energy
+      min_valence: 0.6, // FORCE happy vibes
+      min_danceability: 0.6, // FORCE danceable
+      max_acousticness: 0.4,
     },
     "take-it-easy": {
       target_energy: 0.55,
       target_valence: 0.75,
       target_danceability: 0.55,
       target_tempo: 105,
-      target_acousticness: 0.35,
-      target_instrumentalness: 0.1,
+      min_valence: 0.5, // Keep it positive
+      max_energy: 0.7, // Not too intense
     },
     "stay-focused": {
       target_energy: 0.65,
       target_valence: 0.6,
       target_danceability: 0.45,
       target_tempo: 115,
-      target_acousticness: 0.25,
-      target_instrumentalness: 0.45,
+      min_valence: 0.4,
+      max_speechiness: 0.3, // Less vocals for focus
     },
     "go-with-flow": {
       target_energy: 0.7,
       target_valence: 0.7,
       target_danceability: 0.65,
       target_tempo: 118,
-      target_acousticness: 0.2,
-      target_instrumentalness: 0.2,
+      min_valence: 0.5,
     },
   },
 
@@ -70,32 +77,30 @@ export const MAPPING = {
       target_valence: 0.7,
       target_danceability: 0.75,
       target_tempo: 122,
-      target_acousticness: 0.2,
-      target_instrumentalness: 0.1,
+      min_energy: 0.6,
+      min_danceability: 0.5,
     },
     "take-it-easy": {
       target_energy: 0.4,
       target_valence: 0.55,
       target_danceability: 0.5,
       target_tempo: 95,
-      target_acousticness: 0.5,
-      target_instrumentalness: 0.35,
+      max_energy: 0.6, // FORCE relaxed
+      min_acousticness: 0.25,
     },
     "stay-focused": {
       target_energy: 0.55,
       target_valence: 0.5,
       target_danceability: 0.4,
       target_tempo: 108,
-      target_acousticness: 0.35,
-      target_instrumentalness: 0.6,
+      min_instrumentalness: 0.3,
+      max_speechiness: 0.25,
     },
     "go-with-flow": {
       target_energy: 0.5,
       target_valence: 0.6,
       target_danceability: 0.55,
       target_tempo: 110,
-      target_acousticness: 0.4,
-      target_instrumentalness: 0.4,
     },
   },
 
@@ -105,32 +110,32 @@ export const MAPPING = {
       target_valence: 0.45,
       target_danceability: 0.65,
       target_tempo: 120,
-      target_acousticness: 0.2,
-      target_instrumentalness: 0.1,
+      max_valence: 0.6, // Keep melancholic edge
+      min_energy: 0.5, // But still energetic
     },
     "take-it-easy": {
       target_energy: 0.35,
       target_valence: 0.25,
       target_danceability: 0.35,
       target_tempo: 85,
-      target_acousticness: 0.65,
-      target_instrumentalness: 0.35,
+      max_energy: 0.5, // FORCE mellow
+      max_valence: 0.45, // FORCE sad vibes
+      min_acousticness: 0.3,
     },
     "stay-focused": {
       target_energy: 0.5,
       target_valence: 0.35,
       target_danceability: 0.3,
       target_tempo: 100,
-      target_acousticness: 0.35,
-      target_instrumentalness: 0.7,
+      max_valence: 0.5,
+      min_instrumentalness: 0.3,
     },
     "go-with-flow": {
       target_energy: 0.45,
       target_valence: 0.4,
       target_danceability: 0.45,
       target_tempo: 104,
-      target_acousticness: 0.45,
-      target_instrumentalness: 0.5,
+      max_valence: 0.55,
     },
   },
 
@@ -140,32 +145,32 @@ export const MAPPING = {
       target_valence: 0.55,
       target_danceability: 0.6,
       target_tempo: 130,
-      target_acousticness: 0.15,
-      target_instrumentalness: 0.45,
+      min_energy: 0.65,
+      min_instrumentalness: 0.2,
+      max_speechiness: 0.3,
     },
     "take-it-easy": {
       target_energy: 0.45,
       target_valence: 0.45,
       target_danceability: 0.35,
       target_tempo: 96,
-      target_acousticness: 0.3,
-      target_instrumentalness: 0.75,
+      max_energy: 0.6,
+      min_instrumentalness: 0.4,
     },
     "stay-focused": {
       target_energy: 0.6,
       target_valence: 0.5,
       target_danceability: 0.35,
       target_tempo: 112,
-      target_acousticness: 0.25,
-      target_instrumentalness: 0.85,
+      min_instrumentalness: 0.5, // FORCE instrumental
+      max_speechiness: 0.2, // Less lyrics
     },
     "go-with-flow": {
       target_energy: 0.55,
       target_valence: 0.55,
       target_danceability: 0.45,
       target_tempo: 118,
-      target_acousticness: 0.2,
-      target_instrumentalness: 0.7,
+      min_instrumentalness: 0.3,
     },
   },
 };
@@ -194,12 +199,16 @@ const INTENT_ALIAS = {
 };
 
 function normalizeMood(mood) {
-  const m = String(mood || "").toLowerCase().trim();
+  const m = String(mood || "")
+    .toLowerCase()
+    .trim();
   return MOOD_ALIAS[m] || "chill";
 }
 
 function normalizeIntent(intent) {
-  const i = String(intent || "").toLowerCase().trim();
+  const i = String(intent || "")
+    .toLowerCase()
+    .trim();
   return INTENT_ALIAS[i] || "go-with-flow";
 }
 
@@ -224,8 +233,12 @@ function fallbackTargets(coreMood) {
  * - returns { targets, coreMood, coreIntent, uiMood, uiIntent, isChangeMood }
  */
 export function getTargets(mood, intent) {
-  const uiMood = String(mood || "neutral").toLowerCase().trim();
-  const uiIntent = String(intent || "go-with-flow").toLowerCase().trim();
+  const uiMood = String(mood || "neutral")
+    .toLowerCase()
+    .trim();
+  const uiIntent = String(intent || "go-with-flow")
+    .toLowerCase()
+    .trim();
 
   const isChangeMood = uiIntent === "change-the-mood";
 
@@ -238,10 +251,13 @@ export function getTargets(mood, intent) {
     return { targets, coreMood, coreIntent, uiMood, uiIntent, isChangeMood };
   }
 
-  console.warn(`No mapping found for mood="${uiMood}" intent="${uiIntent}" -> fallback`, {
-    coreMood,
-    coreIntent,
-  });
+  console.warn(
+    `No mapping found for mood="${uiMood}" intent="${uiIntent}" -> fallback`,
+    {
+      coreMood,
+      coreIntent,
+    }
+  );
 
   return {
     targets: fallbackTargets(coreMood),

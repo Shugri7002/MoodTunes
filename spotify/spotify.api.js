@@ -30,13 +30,21 @@ async function apiRequest(endpoint, options = {}) {
   req.headers.Authorization = `Bearer ${token}`;
 
   if (options.body !== undefined) {
-    req.body = typeof options.body === "string" ? options.body : JSON.stringify(options.body);
-    req.headers["Content-Type"] = req.headers["Content-Type"] || "application/json";
+    req.body =
+      typeof options.body === "string"
+        ? options.body
+        : JSON.stringify(options.body);
+    req.headers["Content-Type"] =
+      req.headers["Content-Type"] || "application/json";
   }
 
   const fetchOptions = { ...options, ...req, headers: req.headers };
 
-  console.debug("Spotify API request:", { url, method: fetchOptions.method, body: fetchOptions.body });
+  console.debug("Spotify API request:", {
+    url,
+    method: fetchOptions.method,
+    body: fetchOptions.body,
+  });
 
   const response = await fetch(url, fetchOptions);
   const text = await response.text();
@@ -48,10 +56,16 @@ async function apiRequest(endpoint, options = {}) {
       const newToken = await refreshAccessToken();
       const retryOptions = {
         ...fetchOptions,
-        headers: { ...fetchOptions.headers, Authorization: `Bearer ${newToken}` },
+        headers: {
+          ...fetchOptions.headers,
+          Authorization: `Bearer ${newToken}`,
+        },
       };
 
-      console.debug("Retrying Spotify API request with refreshed token", { url, method: retryOptions.method });
+      console.debug("Retrying Spotify API request with refreshed token", {
+        url,
+        method: retryOptions.method,
+      });
 
       const retryRes = await fetch(url, retryOptions);
       const retryText = await retryRes.text();
@@ -59,7 +73,9 @@ async function apiRequest(endpoint, options = {}) {
 
       if (!retryRes.ok) {
         throw new Error(
-          `Spotify API retry failed: ${retryRes.status} ${retryRes.statusText} - ${JSON.stringify(retryBody)}`
+          `Spotify API retry failed: ${retryRes.status} ${
+            retryRes.statusText
+          } - ${JSON.stringify(retryBody)}`
         );
       }
       return retryBody;
@@ -74,9 +90,15 @@ async function apiRequest(endpoint, options = {}) {
       status: response.status,
       statusText: response.statusText,
       body: errPayload,
-      request: { endpoint, method: fetchOptions.method, body: fetchOptions.body },
+      request: {
+        endpoint,
+        method: fetchOptions.method,
+        body: fetchOptions.body,
+      },
     });
-    throw new Error(`API request failed: ${response.status} - ${JSON.stringify(errPayload)}`);
+    throw new Error(
+      `API request failed: ${response.status} - ${JSON.stringify(errPayload)}`
+    );
   }
 
   return body;
@@ -116,7 +138,10 @@ export async function createPlaylist(userIdOrPayload, maybePayload) {
     isPublic = false,
   } = payload;
 
-  const publicFlag = publicFromPublic !== undefined ? Boolean(publicFromPublic) : Boolean(isPublic);
+  const publicFlag =
+    publicFromPublic !== undefined
+      ? Boolean(publicFromPublic)
+      : Boolean(isPublic);
 
   if (!name?.trim()) throw new Error("Playlist name is required");
   if (!userId) throw new Error("Missing userId for playlist creation");
@@ -125,7 +150,6 @@ export async function createPlaylist(userIdOrPayload, maybePayload) {
     method: "POST",
     body: { name, description, public: publicFlag },
   });
-  
 }
 
 /**
@@ -180,63 +204,54 @@ export async function getTopArtists(limit = 20, time_range = "medium_term") {
   return apiRequest(`/me/top/artists?${params.toString()}`);
 }
 
-export async function getRecommendations(params = {}) {
-  // Spotify recommendations accepts:
-  // seed_artists, seed_tracks, seed_genres (at least 1, max 5 total)
-  const {
-    seed_artists,
-    seed_tracks,
-    seed_genres,
-    limit = 20,
-
-    // allow any target_* / min_* / max_* to pass through
-    ...rest
-  } = params;
-
+export async function getRecommendations({
+  seed_genres,
+  seed_tracks,
+  seed_artists,
+  limit = 20,
+  ...rest
+} = {}) {
   const seeds = {
-    seed_artists: Array.isArray(seed_artists) ? seed_artists.filter(Boolean) : [],
-    seed_tracks: Array.isArray(seed_tracks) ? seed_tracks.filter(Boolean) : [],
     seed_genres: Array.isArray(seed_genres) ? seed_genres.filter(Boolean) : [],
+    seed_tracks: Array.isArray(seed_tracks) ? seed_tracks.filter(Boolean) : [],
+    seed_artists: Array.isArray(seed_artists)
+      ? seed_artists.filter(Boolean)
+      : [],
   };
 
   const totalSeeds =
-    seeds.seed_artists.length + seeds.seed_tracks.length + seeds.seed_genres.length;
-
+    seeds.seed_genres.length +
+    seeds.seed_tracks.length +
+    seeds.seed_artists.length;
   if (totalSeeds === 0) {
-    throw new Error("getRecommendations requires at least one seed: seed_artists, seed_tracks, or seed_genres.");
+    throw new Error(
+      "getRecommendations requires at least one seed: seed_artists, seed_tracks, or seed_genres."
+    );
   }
 
-  // Spotify: max 5 seeds TOTAL
-  const clamp5 = (arr) => arr.slice(0, 5);
-
-  // ensure total <= 5 by slicing in order: tracks, artists, genres
-  let remaining = 5;
-  const st = clamp5(seeds.seed_tracks).slice(0, remaining);
-  remaining -= st.length;
-
-  const sa = clamp5(seeds.seed_artists).slice(0, remaining);
-  remaining -= sa.length;
-
-  const sg = clamp5(seeds.seed_genres).slice(0, remaining);
-
-  const q = new URLSearchParams({
+  const params = new URLSearchParams({
     limit: String(Math.min(100, Math.max(1, Number(limit) || 20))),
   });
 
-  if (st.length) q.set("seed_tracks", st.join(","));
-  if (sa.length) q.set("seed_artists", sa.join(","));
-  if (sg.length) q.set("seed_genres", sg.join(","));
+  // Spotify: max 5 seeds TOTAL, prioritize tracks > artists > genres
+  let remaining = 5;
+  const st = seeds.seed_tracks.slice(0, remaining);
+  remaining -= st.length;
+  const sa = seeds.seed_artists.slice(0, remaining);
+  remaining -= sa.length;
+  const sg = seeds.seed_genres.slice(0, remaining);
 
-  // pass through audio-feature params (target_energy, target_tempo, etc.)
+  if (st.length) params.set("seed_tracks", st.join(","));
+  if (sa.length) params.set("seed_artists", sa.join(","));
+  if (sg.length) params.set("seed_genres", sg.join(","));
+
+  // Pass through mood targets (target_energy, target_valence, etc.)
   for (const [k, v] of Object.entries(rest)) {
-    if (v === undefined || v === null) continue;
-    // allow numeric + strings
-    q.set(k, String(v));
+    if (v != null) params.set(k, String(v));
   }
 
-  return apiRequest(`/recommendations?${q.toString()}`);
+  return apiRequest(`/recommendations?${params.toString()}`);
 }
-
 export async function getTopTracks(limit = 20, time_range = "medium_term") {
   const params = new URLSearchParams({
     limit: String(Math.min(50, Math.max(1, Number(limit) || 20))),
