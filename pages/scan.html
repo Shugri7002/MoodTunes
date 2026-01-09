@@ -2,20 +2,64 @@
 <html lang="nl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MoodTunes - Face Detection</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+    <title>Face API Starter</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #1a1a1a;
+        color: white;
+        font-family: sans-serif;
+        padding-bottom: 50px;
+        /* Wat ruimte onderaan de pagina */
+      }
+
+      #media-container {
+        position: relative;
+        width: 720px;
+        height: 560px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        /* Ruimte tussen camera en knop */
+        border: 2px solid #333;
+      }
+
+      video,
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      button {
+        padding: 15px 30px;
+        /* Iets groter gemaakt voor gebruiksgemak */
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1em;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
   </head>
 
   <body>
-    <header class="container">
-      <h1>MoodTunes</h1>
-      <p class="muted">Let your face set the mood</p>
-    </header>
+    <div id="media-container">
+      <video id="video-feed" width="720" height="560" autoplay muted></video>
+      <canvas id="canvas" width="720" height="560"></canvas>
+    </div>
 
-    <main class="container"></main>
+    <div id="result-display" style="font-weight: bold; font-size: 1.2em"></div>
+    <button id="continue-button">Continue</button>
 
-    <script type="module" src="../js/face-detection.js"></script>
+    <script src="../js/face-api/public/face-api.min.js"></script>
+    <script src="../js/face-api/public/scripts.js"></script>
   </body>
 </html>
