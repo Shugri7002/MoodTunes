@@ -2,20 +2,62 @@
 <html lang="nl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MoodTunes - Face Detection</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+    <title>Face API Starter</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #1a1a1a;
+        color: white;
+        font-family: sans-serif;
+      }
+
+      /* De container zorgt dat video en canvas op dezelfde plek starten */
+      #media-container {
+        position: relative;
+        width: 720px;
+        height: 560px;
+        margin-top: 20px;
+        border: 2px solid #333;
+      }
+
+      video,
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+      }
+    </style>
   </head>
 
   <body>
-    <header class="container">
-      <h1>MoodTunes</h1>
-      <p class="muted">Let your face set the mood</p>
-    </header>
+    <h1>Face API Detectie</h1>
 
-    <main class="container"></main>
+    <button id="start-camera">Start Camera</button>
+    <button id="stop-camera" disabled>Stop Camera</button>
 
-    <script type="module" src="../js/face-detection.js"></script>
+    <div id="media-container" style="position: relative">
+      <video id="video-feed" width="720" height="560" autoplay muted></video>
+      <canvas
+        id="canvas"
+        width="720"
+        height="560"
+        style="position: absolute; top: 0; left: 0"
+      ></canvas>
+    </div>
+
+    <script src="../js/face-api/public/face-api.min.js"></script>
+    <script src="../js/face-api/public/scripts.js"></script>
   </body>
 </html>
