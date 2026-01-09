@@ -96,7 +96,7 @@ function startDetection() {
       );
 
       faceapi.draw.drawDetections(canvas, resizedDetections);
-      faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      //   faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
 
       // Bovenkant box: Emotie
       new faceapi.draw.DrawTextField(
@@ -105,15 +105,15 @@ function startDetection() {
       ).draw(canvas);
 
       // Onderkant box: Leeftijd en Geslacht
-      new faceapi.draw.DrawTextField(
-        [
-          `${Math.round(detection.age)} jaar`,
-          `${detection.gender} (${Math.round(
-            detection.genderProbability * 100
-          )}%)`,
-        ],
-        detection.detection.box.bottomLeft
-      ).draw(canvas);
+      //   new faceapi.draw.DrawTextField(
+      //     [
+      //       `${Math.round(detection.age)} jaar`,
+      //       `${detection.gender} (${Math.round(
+      //         detection.genderProbability * 100
+      //       )}%)`,
+      //     ],
+      //     detection.detection.box.bottomLeft
+      //   ).draw(canvas);
     });
   }, 100);
 }
