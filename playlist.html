@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MoodTunes - Your Playlist</title>
+
+   <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="review-popup.css" />
+<script src="../js/review-popup.js" defer></script>
+<script type="module" src="../js/playlist.js" defer></script>
+
+  </head>
+
+  <body>
+    <header class="container">
+      <h1>MoodTunes</h1>
+      <div id="user-info" class="muted"></div>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <h2>Your Playlist</h2>
+        <p id="playlist-name" class="playlist-name"></p>
+
+        <div class="tracks-container">
+          <ul id="tracks"></ul>
+        </div>
+
+        <div class="action-section">
+          <button id="create-btn" class="btn btn-primary">
+            ➕ Add to Spotify
+          </button>
+          <button id="customize-btn" class="btn btn-secondary">
+            🔄 Customize Again
+          </button>
+          <p id="created" class="muted"></p>
+        </div>
+      </section>
+    </main>
+
+    <!-- REVIEW POPUP -->
+  <div class="review-overlay" id="reviewOverlay">
+  <div class="review-modal">
+    <h2 class="review-title">Did this help with how you're feeling?</h2>
+
+    <div class="review-options">
+      <button class="review-card review-no" id="reviewNo">
+        <span class="card-x"></span>
+        <span class="card-text">No, not really</span>
+      </button>
+
+      <button class="review-card review-yes" id="reviewYes">
+        <span class="card-x"></span>
+        <span class="card-text">Yes, it helped</span>
+      </button>
+    </div>
+
+    <button class="review-notnow" id="reviewNotNow">Not now</button>
+  </div>
+</div>
+
+    <!-- END REVIEW POPUP -->
+  </body>
+</html>

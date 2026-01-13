@@ -1,0 +1,100 @@
+/* Dim background */
+.review-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: none;
+  align-items: flex-end;   /* bottom like phone */
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+/* Small phone-like card */
+.review-modal {
+  width: 100%;
+  max-width: 380px;
+  background: #0b0b0b;
+  color: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  animation: slideUp 200ms ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.review-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* buttons row */
+.review-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.review-card {
+  flex: 1;
+  border-radius: 14px;
+  border: none;
+  padding: 14px 10px;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  min-height: 64px;
+}
+
+.review-no { background: #8e89ff; color: #0b0b0b; }
+.review-yes { background: #caff76; color: #0b0b0b; }
+
+.card-text {
+  display: block;
+  font-size: 14px;
+}
+
+/* small close X in top-left of each card (like your design) */
+.card-x {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid rgba(0,0,0,0.75);
+}
+
+.card-x::before,
+.card-x::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 2px;
+  background: rgba(0,0,0,0.8);
+  transform-origin: center;
+}
+
+.card-x::before { transform: translate(-50%,-50%) rotate(45deg); }
+.card-x::after  { transform: translate(-50%,-50%) rotate(-45deg); }
+
+.review-notnow {
+  width: 100%;
+  margin-top: 6px;
+  background: rgba(255,255,255,0.06);
+  color: #ddd;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  padding: 12px 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
