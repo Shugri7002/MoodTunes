@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face API Scanner</title>
+
+  <style>
+    /* Hieronder staat jouw CSS */
+    :root {
+      --bg: #f2f2ee;
+      --line: #111;
+      --green: #c9ff76;
+      --purple: #8e85ff;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+    }
+
+    .scan-page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+    }
+
+    .scan-card {
+      width: min(420px, 92vw);
+      display: grid;
+      justify-items: center;
+      gap: 18px;
+    }
+
+    /* camera area */
+    .camera-wrap {
+      position: relative;
+      width: 100%;
+      /* Gebruik de volledige breedte van de kaart */
+      max-width: 340px;
+      /* Maar nooit breder dan dit */
+      aspect-ratio: 3 / 4;
+      /* Behoudt een verticale vorm die goed is voor gezichten */
+      margin: 0 auto;
+    }
+
+    .camera-back {
+      position: absolute;
+      inset: 0;
+      transform: translate(-12px, 12px);
+      border: 3px solid var(--line);
+      background: var(--green);
+      border-radius: var(--radius);
+    }
+
+    .camera-frame {
+      position: absolute;
+      inset: 0;
+      border: 3px solid var(--line);
+      background: #000;
+      /* Zwart ziet er beter uit tijdens laden */
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    /* Video vult het hele frame */
+    #video-feed {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Zorgt dat het gezicht het frame vult zonder vervorming */
+    }
+
+    .corner {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+      z-index: 10;
+    }
+
+    .c1 {
+      top: 42px;
+      left: 42px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .c2 {
+      top: 42px;
+      right: 42px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .c3 {
+      bottom: 42px;
+      left: 42px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .c4 {
+      bottom: 42px;
+      right: 42px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .face-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* button */
+    .continue-btn {
+      width: min(220px, 70vw);
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 2px solid var(--line);
+      background: var(--purple);
+      color: #111;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .continue-btn:hover {
+      filter: brightness(0.98);
+      transform: translateY(-2px);
+    }
+
+    .continue-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    #result-display {
+      text-align: center;
+      font-weight: bold;
+      min-height: 24px;
+    }
+
+    .placeholder-text,
+    #result-display {
+      font-size: 1.2rem;
+      padding: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="scan-page">
+    <div class="scan-card">
+
+      <div id="result-display">Wachten op camera...</div>
+
+      <div class="camera-wrap">
+        <div class="camera-back"></div>
+
+        <div class="camera-frame">
+          <video id="video-feed" autoplay muted playsinline></video>
+          <canvas id="canvas" class="face-canvas"></canvas>
+
+          <div class="corner c1"></div>
+          <div class="corner c2"></div>
+          <div class="corner c3"></div>
+          <div class="corner c4"></div>
+        </div>
+      </div>
+
+      <button id="continue-button" class="continue-btn">CONTINUE</button>
+
+    </div>
+  </main>
+
+  <script src="../js/face-api/public/face-api.min.js"></script>
+  <script src="../js/face-api/public/scripts.js"></script>
+
+</body>
+
+</html>
