@@ -407,6 +407,10 @@ p {
   display: none;
 }
 
+.mood-options-container .back-link {
+  color: #000;
+}
+
 .generate-btn {
   display: block;
   margin: 30px auto 0;
