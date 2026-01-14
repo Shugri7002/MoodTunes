@@ -265,11 +265,11 @@ p {
   cursor: pointer;
   transition: all 0.2s ease;
   width: fit-content;
+  transition: background-color 0.3s ease;
 }
 
 .cta-btn:hover {
-  transform: scale(1.03);
-  box-shadow: 0 6px 20px rgba(184, 245, 96, 0.25);
+  background-color: var(--primary-color);
 }
 
 /* Auth elements */
